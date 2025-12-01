@@ -1,0 +1,45 @@
+﻿@using System.Globalization
+@model IEnumerable<TransactionHistoryViewModel>
+
+@{
+    ViewData["Title"] = "Transaction History";
+}
+
+<h2 class="mt-4 mb-5">Transaction History</h2>
+
+@if (!Model.Any()) {
+    <div class="alert alert-info">
+        You have no transaction history yet.
+    </div>
+} else {
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Currency</th>
+                    <th>Credits</th>
+                    <th>Invoice No.</th>
+                    <th>Invoice</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var tx in Model) {
+                    <tr>
+                        <td>@tx.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td style="text-align: right;">@tx.Amount.ToString()</td>
+                        <td>@tx.Currency.ToUpper()</td>
+                        <td style="text-align: right;">@tx.Credits.ToString("N0", new CultureInfo("sk-SK"))</td>
+                        <td>@tx.InvoiceNumber.ToString()</td>
+                        <td>
+                            <a asp-controller="DownloadInvoice" asp-action="Download" asp-route-transactionId="@tx.Id" target="_blank" class="btn btn-sm">
+                                ⬇ Download
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

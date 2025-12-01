@@ -1,0 +1,57 @@
+﻿@model InvoicingProfileViewModel
+
+@{
+    ViewData["Title"] = "Billing details";
+}
+
+<h2 class="mt-4 mb-5">Billing details</h2>
+
+<div class="detail-form">
+    <form asp-controller="Invoicing" asp-action="SaveInvoicingDetails" method="post">
+        <input type="hidden" asp-for="@Model.UserId" />
+        <input type="hidden" asp-for="UserName" class="form-control" readonly />
+
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Email:</strong> <input asp-for="UserEmail" class="form-control" readonly /></p>
+                <span asp-validation-for="UserEmail" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row">            
+            <div class="col-md-6">
+                <p><strong>Company (or person) name:</strong> <input asp-for="CompanyName" class="form-control" /></p>
+                <span asp-validation-for="CompanyName" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Tax Identifier:</strong> <input asp-for="TaxIdentifier" class="form-control" /></p>
+                <span asp-validation-for="TaxIdentifier" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-9">
+                <p><strong>Address:</strong> <input asp-for="AddressLine1" class="form-control" /></p>
+                <span asp-validation-for="AddressLine1" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <p><strong>House number:</strong> <input asp-for="HouseNumber" class="form-control" /></p>
+                <span asp-validation-for="HouseNumber" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <p><strong>City:</strong> <input asp-for="City" class="form-control" /></p>
+                <span asp-validation-for="City" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <p><strong>Postal Code:</strong> <input asp-for="PostalCode" class="form-control" /></p>
+                <span asp-validation-for="PostalCode" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <p><strong>Country:</strong> <input asp-for="Country" class="form-control" /></p>
+                <span asp-validation-for="Country" class="text-danger"></span>
+			</div>
+		</div>
+
+        <button type="submit" class="btn btn-success">💾 Save</button>
+    </form>
+</div>

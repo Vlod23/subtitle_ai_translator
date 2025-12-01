@@ -1,0 +1,79 @@
+﻿@{
+    ViewData["Title"] = "Buy Credits";
+}
+<br />
+<h2 class="text-center my-4">Buy More Credits</h2>
+<br />
+<div class="row justify-content-center">
+    <!-- Tier 1 -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header text-center">
+                <h4 class="my-0">Starter</h4>
+            </div>
+            <div class="card-body text-center">
+                <br />
+                <h1 class="card-title pricing-card-title">20 000</h1>
+                <h6>credits</h6>
+                <p>(about <strong>2</strong> movies)</p>
+                <br />
+                <ul class="list-unstyled mt-3 mb-4">
+                    <li><h4><strong style="color: green">€2.00</strong></h4></li>
+                    <li>Perfect for occasional use</li>
+                </ul>
+                <form method="post" asp-action="CreateCheckoutSession">
+                    <input type="hidden" name="creditAmount" value="20000" />
+                    <button type="submit" class="btn btn-outline-primary w-100">Buy Now</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tier 2 (Recommended) -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-lg border-primary">
+            <div class="card-header text-center bg-primary text-white">
+                <h4 class="my-0">Best Value</h4>
+            </div>
+            <div class="card-body text-center">
+                <br />
+                <h1 class="card-title pricing-card-title">100 000</h1>
+                <h6>credits</h6>
+                <p>(about <strong>10</strong> movies)</p>
+                <br />
+                <ul class="list-unstyled mt-3 mb-4">
+                    <li><h4><strong style="color: green">€10.00</strong></h4></li>
+                    <li>Most popular option</li>
+                </ul>
+                <form method="post" asp-action="CreateCheckoutSession">
+                    <input type="hidden" name="creditAmount" value="100000" />
+                    <button type="submit" class="btn btn-primary w-100">Buy Now</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tier 3 -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header text-center">
+                <h4 class="my-0">Power User</h4>
+            </div>
+            <div class="card-body text-center">
+                <br />
+                <h1 class="card-title pricing-card-title">500 000</h1>
+                <h6>credits</h6>
+                <p>(about <strong>50</strong> movies)</p>
+                <br />
+                <ul class="list-unstyled mt-3 mb-4">
+                    <li><h4><strong style="color: green">€50.00</strong></h4></li>
+                    <li>For frequent translators</li>
+                </ul>
+                <form method="post" asp-action="CreateCheckoutSession">
+                    <input type="hidden" name="creditAmount" value="500000" />
+                    <button type="submit" class="btn btn-outline-primary w-100">Buy Now</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

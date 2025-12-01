@@ -1,0 +1,162 @@
+﻿@model SubtitleUploadViewModel
+@{
+    ViewData["Title"] = "Subtitle upload";
+}
+
+<h2 class="text-center mt-4 mb-5 fw-bold">Upload Your Subtitle File</h2>
+
+<form asp-action="Upload" asp-controller="Upload" method="post" id="uploadForm" enctype="multipart/form-data" class="mx-auto form-upload" style="max-width: 600px;">
+    
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label asp-for="TargetLanguage" class="form-label form-lbl-mandatory">Target Language: </label>
+        <select asp-for="TargetLanguage" class="form-select language-select"
+                asp-items="Model.LanguageList">
+            <option value="">-- Select --</option>
+        </select>
+
+        <span asp-validation-for="TargetLanguage" class="text-danger"></span>
+    </div>
+    <br />
+    <div class="mb-4">
+        <label asp-for="File" class="form-label form-lbl-mandatory">Select .srt File</label>
+        <input asp-for="File" id="File" type="file" class="form-control" />
+        <span asp-validation-for="File" class="text-danger"></span>
+    </div>
+    <div class="text-center mb-3">
+        <span class="estimate-text" style="display: none;">Estimated cost: </span>
+        <span id="credit-estimate" class="fw-bold "></span>
+        <span class="estimate-text creditcard-icon" style="display: none;"> 💳</span>
+    </div>
+    <br />
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary btn-lg px-4 py-2">
+            Upload & Translate ✨
+        </button>
+    </div>
+    <br />
+    <br />
+    <br />
+    <div class="form-upload-optional-details">
+        <h6>Optional details</h6>
+        <br />
+        <div class="row">
+            <div class="col-md-12">
+                <div class="mb-3">
+                    <label asp-for="SubtitleName" class="form-label">Name</label>
+                    <input asp-for="SubtitleName" class="form-control" placeholder="If left empty: file name and language will be used" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label asp-for="Director" class="form-label">Director</label>
+                    <input asp-for="Director" class="form-control" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label asp-for="Year" class="form-label">Year</label>
+                    <input asp-for="Year" type="number" class="form-control" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <input asp-for="CreditCost" type="number" type="hidden" />
+    <input asp-for="IsPublic" type="checkbox" role="switch" style="display:none;" />
+</form>
+
+@* Progress bar *@
+<div id="progressOverlay">
+    <h2>Translating your file...</h2>
+    <div class="progress-overlay-bckgrnd">
+        <div id="progressBar"></div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            //Language selection with Select2
+            $('.language-select').select2({
+                placeholder: "Select...",
+                allowClear: true
+            });
+
+            const form = $("#uploadForm");
+
+            form.on("submit", function (e) {
+                // Prevent loading animation if form is not valid
+                if (!form.valid()) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                $(this).find('button[type="submit"]').prop('disabled', true);
+
+                $("#progressOverlay").show();
+                animateProgressBar();
+            });
+        });        
+
+        function animateProgressBar() {
+            const bar = document.getElementById("progressBar");
+            let width = 0;
+
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                } else {
+                    width += Math.random() * 10;
+                    if (width > 100) width = 100;
+                    bar.style.width = width + "%";
+                }
+            }, 100);
+        }
+
+        function estimateCredits() {
+            const fileInput = $('#File')[0];
+
+            if (fileInput.files.length === 0) {
+                $('#credit-estimate').text('');
+                $('.estimate-text').hide();
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            $.ajax({
+                url: '/Upload/EstimateCredits',
+                method: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function (response) {
+                    const formattedCredits = response.credits.toLocaleString('sk-SK');
+                    $('#credit-estimate').text(formattedCredits);
+                    $('.estimate-text').show();
+                    $('input[name="CreditCost"]').val(response.credits);
+                },
+                error: function () {
+                    $('#credit-estimate').text("Unable to estimate credits. Try t ochoose a language again.");
+                }
+            });
+        }
+
+        // Trigger on file change
+        $('#File').on('change', estimateCredits);
+
+    </script>
+
+}

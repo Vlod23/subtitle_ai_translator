@@ -1,0 +1,124 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - SubtitlesTranslator</title>
+
+    <link rel="icon" type="image/png" sizes="32x32" href="~/Images/logo.png" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- DataTables.net-->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" />
+    <!-- Cookie banner -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
+    <!-- Site css -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- HEADER -->
+        <partial name="_Header" />
+        <!-- BODY -->
+        <main role="main" class="pb-3">
+            <div class="container">
+                @RenderBody()
+            </div>
+        </main>
+        <!-- FOOTER -->
+        <partial name="_Footer" />
+    </div>
+
+    <!-- USER DETAIL MODAL -->
+    <div class="modal fade" id="editUsernameModal" tabindex="-1" aria-labelledby="editUsernameModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form asp-controller="User" asp-action="UpdateUserName" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editUsernameModalLabel">Edit Username</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <input name="userName" class="form-control" value="@User.Identity.Name" required />
+                            <input name="returnUrl" value="@Context.Request.Path" type="hidden" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- DataTables.net-->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+    <!-- Cookie banner -->
+    <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+    @{
+        string? message = TempData["SuccessMsg"]?.ToString() ?? TempData["ErrorMsg"]?.ToString();
+        var messageColor = TempData["SuccessMsg"] != null ? "bg-success" : "bg-danger";
+    }
+
+    <div id="toastMessage" class="@messageColor toast align-items-center text-white border-0 position-fixed top-0 start-50 translate-middle-x m-3"
+         role="alert" aria-live="assertive" aria-atomic="true" style="display:none; z-index: 9999;">
+        <div class="d-flex">
+            <div class="toast-body" id="toastBody">
+                @if (!string.IsNullOrEmpty(message)) {
+                    @Html.Raw(message)
+                }
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener("load", function () {
+            window.cookieconsent.initialise({
+                palette: {
+                    popup: {
+                        background: "#0d6efd"
+                    },
+                    button: {
+                        background: "#212529"
+                    }
+                },
+                theme: "classic",
+                position: "bottom-right",
+                type: "opt-in", // or 'info' if you don’t need opt-in
+                content: {
+                    message: "This website uses cookies to ensure you get the best experience.",
+                    dismiss: "Accept",
+                    deny: "Decline",
+                    link: "Learn more",
+                    href: "/Home/CookiePolicy"
+                },
+                onInitialise: function (status) {
+                    var type = this.options.type;
+                    var didConsent = this.hasConsented();
+                    if (type === 'opt-in' && didConsent) {
+                        // Enable analytics or 3rd party cookies
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

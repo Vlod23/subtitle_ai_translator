@@ -1,0 +1,75 @@
+﻿@using System.Globalization
+@model TranslationDetailViewModel
+@{
+    ViewData["Title"] = "Translation detail";
+}
+
+<br />
+@if (!string.IsNullOrEmpty(Model.TranslatedText)) {
+    <a asp-controller="Download" asp-action="DownloadTranslated" asp-route-id="@Model.Id" id="downloadBtn" class="btn btn-primary">
+        ⬇ Download Translated .srt
+    </a>
+}
+<br />
+<br />
+<div class="detail-form">
+    <form asp-controller="SubtitleManagement" asp-action="Update" method="post">
+        <input type="hidden" asp-for="@Model.Id" />
+        <input type="hidden" asp-for="@Model.OriginalText" />
+        <input type="hidden" asp-for="@Model.TargetLanguage" />
+        <input type="hidden" asp-for="@Model.CreatedAt" />
+
+        <div class="row">
+            <div class="col-md-12">
+                <p><strong>Name:</strong> <input asp-for="Name" class="form-control" /></p>
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <p><strong>Year:</strong> <input asp-for="Year" class="form-control" /></p>
+            </div>
+            <div class="col-md-4">
+                <p><strong>Director:</strong> <input asp-for="Director" class="form-control" /></p>
+            </div>
+        </div>
+        
+        <p class="checkbox-custom-line"><strong>Public:</strong> <input asp-for="IsPublic" type="checkbox" class="checkbox-custom" /></p>
+        <p><strong>Uploaded:</strong> @Model.CreatedAt.ToShortDateString()</p>
+        <p><strong>Credits used:</strong> @Model.CreditsUsed.ToString("N0", new CultureInfo("sk-SK"))</p>
+
+        <br />
+        <button type="submit" class="btn btn-success">💾 Save Changes</button>
+        <br />
+        <br />
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Original Subtitle</h4>
+                <pre class="p-2 mt-4 border bg-light">
+                    @Model.OriginalText
+                </pre>
+            </div>
+
+            <div class="col-md-6">
+                <h4>Translated Subtitle (@Model.TargetLanguage)</h4>
+                <pre style="padding: 0 5px;">
+                    <textarea asp-for="TranslatedText" class="form-control p-2" style="font-size: 14px; margin-top: -5px;" rows="@Model.TranslatedText?.Split('\n').Length ?? 10"></textarea>
+                </pre>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-success">💾 Save Changes</button>
+    </form>
+</div>
+
+<br />
+
+@if (!string.IsNullOrEmpty(Model.TranslatedText)) {
+    <a asp-controller="Download" asp-action="DownloadTranslated" asp-route-id="@Model.Id" id="downloadBtn" class="btn btn-primary">
+        ⬇ Download Translated .srt
+    </a>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

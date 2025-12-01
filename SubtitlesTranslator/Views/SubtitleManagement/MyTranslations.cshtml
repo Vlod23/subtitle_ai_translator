@@ -1,0 +1,142 @@
+﻿@using System.Globalization
+@using Microsoft.AspNetCore.Html
+@using SubtitlesTranslator.Domain.Enums
+@model UserDashboardViewModel
+
+<div class="dashboard-credits">
+    <div>
+        <p>
+            <span class="creditcard-icon">💳</span> 
+            <strong>@Model.Credits.ToString("N0", new CultureInfo("sk-SK"))</strong> 
+            translation credits remaining
+        </p>
+    </div>
+    <div class="dashboard-credits-btns">
+        <a asp-controller="Credits" asp-action="BuyCredits" class="btn btn-success btn-mobile-m-bottom">Buy Credits</a>
+        <a asp-controller="TransactionHistory" asp-action="Index" class="btn btn-outline-dark btn-mobile-m-bottom">View Purchase History</a>
+        <a asp-controller="Invoicing" asp-action="InvoicingDetails" class="btn btn-outline-dark btn-mobile-m-bottom">Billing Details</a>
+    </div>
+</div>
+
+<hr />
+<br />
+<div class="mobile-center">
+    <h2>My Translations</h2>
+    <br />
+    <a class="btn btn-primary" asp-controller="Upload" asp-action="SubtitleUpload">Upload New</a>
+</div>
+<br />
+<br />
+<table id="publicSubtitles" class="table table-striped responsive nowrap">
+    <thead>
+        <tr>
+            <th class="sortable-column">Name</th>
+            <th class="sortable-column">Year</th>
+            <th class="sortable-column">To Language</th>
+            <th class="sortable-column">Created</th>
+            <th>Credits used</th>
+            <th>Public</th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var s in Model.Subtitles) {
+            <tr>
+                <td class="shorten-filename" title="@s.Name">@s.Name</td>
+                <td>@s.Year</td>
+                <td>@s.TargetLanguage</td>
+
+                <td data-order="@s.CreatedAt.ToString("yyyyMMddHHmmss")">
+                    @s.CreatedAt.ToString("d. M. yyyy H:mm:ss")
+                </td>
+                <td style="text-align: right;">@s.CreditsUsed.ToString("N0", new CultureInfo("sk-SK"))</td>
+                <td>
+                    @if (s.Status == TranslationStatus.Translated) {
+                        <input type="checkbox" class="toggle-public" data-id="@s.Id" @(s.IsPublic ? "checked" : "") />
+                    }
+                </td>
+                <td>
+                    @if (s.Status == TranslationStatus.Translated) {
+                        <a asp-controller="SubtitleManagement" asp-action="TranslationDetail" asp-route-id="@s.Id" class="btn btn-sm btn-outline-primary">👁 View</a>
+                    }
+                </td>
+                <td>
+                    @switch (s.Status) {
+                        case TranslationStatus.Translated:
+                            <a asp-controller="Download" asp-action="DownloadTranslated" asp-route-id="@s.Id" id="downloadBtn" class="btn btn-sm btn-light">
+                                ⬇ Download
+                            </a>
+                            break;
+
+                        case TranslationStatus.Failed:
+                            <span class="text-warning">Translation failed</span>
+                            break;
+
+                        case TranslationStatus.Pending:
+                            <span class="text-muted">⏳ Translating... </span>
+                            break;
+                    }
+                </td>
+                <td>
+                    @if (s.Status != TranslationStatus.Pending) {
+                        <form asp-controller="SubtitleManagement" asp-action="Delete" asp-route-id="@s.Id" method="post" onsubmit="return confirm('Are you sure you want to delete this translation?');">
+                            <button type="submit" class="btn btn-sm">🗑</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+
+   
+</table>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // toggle IsPublic
+            $('.toggle-public').on('change', function () {
+                const checkbox = $(this);
+                const id = checkbox.data('id');
+                const isPublic = checkbox.is(':checked');
+                const token = $('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: '/SubtitleManagement/TogglePublic',
+                    type: 'POST',
+                    data: { 
+                        id: id, 
+                        isPublic: isPublic,
+                        __RequestVerificationToken: token
+                    },
+                    success: function () {
+                        console.log("Updated successfully");
+                    },
+                    error: function () {
+                        alert("Failed to update visibility. Please try again.");
+                        checkbox.prop('checked', !isPublic); // revert on failure
+                    }
+                });
+            });
+
+            // DataTable.net            
+            $('#publicSubtitles').DataTable({
+                paging: true,
+                pageLength: 50,
+                searching: true,
+                ordering: true,
+                order: [[3, 'desc']], // default ordering by date
+                responsive: true,
+                columnDefs: [
+                    { targets: 0, responsivePriority: 1 }, // Name
+                    { targets: 2, responsivePriority: 2 }, // Language
+                    { targets: 3, type: 'num', searchable: false },
+                    { targets: [4, 5, 6, 7, 8], orderable: false, searchable: false },
+                ],
+                dom: '<"row mb-3"<"col-sm-6"f><"col-sm-6"l>>rt<"row mt-3"<"col-sm-6"i><"col-sm-6"p>>', // Just switches positions of searchbar and paging settings
+            });
+        });        
+    </script>
+}

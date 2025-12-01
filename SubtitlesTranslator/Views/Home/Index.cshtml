@@ -1,0 +1,126 @@
+﻿@model IEnumerable<PublicSubtitlesViewModel>
+
+@{
+    ViewData["Title"] = "Home Page";
+	bool isAuthenticated = User.Identity.IsAuthenticated;
+} 
+
+<div class="text-center hero-banner">
+    <br />
+    <br />
+    <h1 class="display-4" style="font-weight:bold;">AI Subtitle Translator</h1>
+    <br />
+    <h4>Upload your .SRT file and translate it <b>with one click!</b></h4>
+    <br />
+    <h6>ALL Languages Supported</h6>
+    <br />
+    <a class="btn btn-primary" asp-controller="Upload" asp-action="SubtitleUpload">Upload 🚀</a>
+    <br />
+    <br />
+</div>
+<br />
+<hr />
+<br />
+<div class="mt-5">
+    <h3 class="mb-4 text-center fw-bold">Browse Public Subtitles</h3>
+
+    <div class="table-responsive">
+        <table id="publicSubtitles" class="table table-striped responsive nowrap">
+            <thead class="table-primary">
+                <tr>
+                    <th class="sortable-column">Name</th>
+                    <th class="sortable-column">Year</th>
+                    <th class="sortable-column">Language</th>
+					<th class="sortable-column">Likes</th>
+                    <th class="sortable-column">Uploaded</th>
+                    <th>User</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var subtitle in Model)
+                {
+                    <tr>
+                        <td class="shorten-filename" title="@subtitle.Name">@subtitle.Name</td>
+                        <td>@subtitle.Year</td>
+                        <td>@subtitle.TargetLanguage</td>
+                        <td data-order="@subtitle.LikesCount">
+                            <button type="button" class="like-btn" data-subtitle-id="@subtitle.Id">
+                                👍 <span class="score">@subtitle.LikesCount</span>
+                            </button>
+                        </td>
+                        <td data-order="@subtitle.CreatedAt.ToString("yyyyMMddHHmmss")">
+                            @subtitle.CreatedAt.ToString("d. M. yyyy H:mm:ss")
+                        </td>
+                        <td>@subtitle.UserName</td>
+                        <td>
+                            <a asp-controller="Download" 
+                            asp-action="DownloadTranslated" 
+                            asp-route-id="@subtitle.Id" 
+                            asp-route-isAuth="@isAuthenticated" 
+                            id="downloadBtn" class="btn btn-sm">
+                                ⬇ Download
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // resume download interrupted by login
+            const urlParams = new URLSearchParams(window.location.search);
+            const autoDownload = urlParams.get("reDownload");
+
+            if (autoDownload === "True") {
+                const downloadLink = document.getElementById("downloadBtn");
+
+                if (downloadLink) {
+                    downloadLink.click();
+
+                    // remove param from URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
+
+            // DataTable.net
+            $('#publicSubtitles').DataTable({
+                paging: true,
+                pageLength: 50,
+                searching: true,
+                ordering: true,
+                order: [[4, 'desc']],
+                responsive: true,
+                columnDefs: [
+                    { targets: 0, responsivePriority: 1 }, // Name
+                    { targets: 2, responsivePriority: 2 }, // Language
+                    { targets: [3, 4], searchable: false }, // CreatedAt
+                    { targets: [5, 6], orderable: false, searchable: false },
+                ],
+                dom: '<"row mb-3"<"col-sm-6"f><"col-sm-6"l>>rt<"row mt-3"<"col-sm-6"i><"col-sm-6"p>>',
+            });
+
+            // Toggle like
+            $('.like-btn').on('click', function (e) {
+                e.preventDefault();
+
+                var button = $(this);
+                var subtitleId = button.data('subtitle-id');
+                var scoreDisplay = button.find('.score');
+
+                $.post('/SubtitleManagement/ToggleLike', { subtitleId: subtitleId }, function (data) {
+                    if (data.success) {
+                        scoreDisplay.text(data.score);
+                    } else {
+                        showToast(data.message, false);
+                    }
+                });
+            });
+        });
+
+    </script>
+}
