@@ -26,20 +26,33 @@ namespace SubtitlesTranslator.Application.UseCases
             _PDFGenerator = PDFGenerator;
         }
 
-        public async Task<InvoicePdfResult> ExecuteAsync(int transactionId) 
+        public async Task<InvoicePdfResult> ExecuteAsync(object id, bool isIntId) 
         {
-            var transaction = await _paymentTransactionRepository.GetByIdAsync(transactionId);
+            var transaction = new Domain.Entities.PaymentTransaction();
+
+            if (isIntId) {
+                if (int.TryParse(id.ToString(), out var parsedId)) 
+                {
+                    transaction = await _paymentTransactionRepository.GetByIdAsync(parsedId);
+                }
+            } else {
+                var invoiceNo = id?.ToString() ?? string.Empty;
+                transaction = await _paymentTransactionRepository.GetByInvoiceNumberAsync(invoiceNo);
+            }
+            if (transaction == null)
+                return new InvoicePdfResult();
+            
             var user = await _userRepository.GetUserByIdAsync(transaction.UserId);
             var userInvoiceProfile = await _invoicingProfileRepository.GetByUserIdAsync(transaction.UserId);
 
             var model = new InvoicePrintModel();
 
-            model.AppName = _config["AppDetails:AppName"];
-            model.AppAddress = _config["AppDetails:AppAddress"];
-            model.AppCity = _config["AppDetails:AppCity"];
-            model.AppZip = _config["AppDetails:AppZip"];
-            model.AppTaxId = _config["AppDetails:AppTaxId"];
-            model.AppContact = _config["AppDetails:AppEmail"];
+            model.AppName = _config["AppDetails:AppName"] ?? "";
+            model.AppAddress = _config["AppDetails:AppAddress"] ?? "";
+            model.AppCity = _config["AppDetails:AppCity"] ?? "";
+            model.AppZip = _config["AppDetails:AppZip"] ?? "";
+            model.AppTaxId = _config["AppDetails:AppTaxId"] ?? "";
+            model.AppContact = _config["AppDetails:AppEmail"] ?? "";
 
             model.UserName = user.UserName;
             model.UserEmail = user.Email;
@@ -57,11 +70,13 @@ namespace SubtitlesTranslator.Application.UseCases
             model.PaymentCurrency = transaction.Currency;
             model.InvoiceNumber = transaction.InvoiceNumber;
 
-            var result = new InvoicePdfResult();
+            var result = new InvoicePdfResult
+            {
+                UserId = transaction.UserId,
+                PdfBytes = _PDFGenerator.Generate(model),
+                InvoiceNumber = transaction.InvoiceNumber
+            };
 
-            result.PdfBytes = _PDFGenerator.Generate(model);
-            result.InvoiceNumber = transaction.InvoiceNumber;
-            
             return result;
         }
     }

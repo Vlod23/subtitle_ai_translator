@@ -1,4 +1,5 @@
-﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity
+@using SubtitlesTranslator.Application.Authorization
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
@@ -8,13 +9,19 @@
     <li class="nav-item">
         <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
     </li>
+    @if (User.HasClaim(AuthorizationConstants.PermissionClaimType, PermissionNames.ViewAdminArea))
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="Admin" asp-controller="Home" asp-action="Index">Admin</a>
+        </li>
+    }
     <li class="nav-item mobile-hide-navitem">
         <button type="button" class="btn btn-sm btn-link p-0" data-bs-toggle="modal" data-bs-target="#editUsernameModal" title="Edit username">
             ⚙️
         </button>
     </li>
     <li class="nav-item upload-estimate">
-            <a asp-controller="SubtitleManagement" asp-action="MyTranslations" class="nav-link">
+            <a asp-area="" asp-controller="SubtitleManagement" asp-action="MyTranslations" class="nav-link">
                 <span>Credits: </span>
                 <span class="text-success">@await Component.InvokeAsync("UserCredits")</span> @* <span id="userCredits"> *@
             </a>

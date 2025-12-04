@@ -1,0 +1,44 @@
+@model IEnumerable<RolePermissionsViewModel>
+@{
+    ViewData["Title"] = "Roles & permissions";
+    var roleList = Model.ToList();
+}
+
+<div class="mb-3">
+    <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="btn btn-link">&larr; Back to users</a>
+</div>
+
+<h1 class="h3 mb-3">Roles & permissions</h1>
+
+@foreach (var role in roleList)
+{
+    var rolePermissions = role.Permissions.ToList();
+    <form asp-area="Admin" asp-controller="Roles" asp-action="Update" method="post" class="card mb-3">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="RoleId" value="@role.RoleId" />
+        <input type="hidden" name="RoleName" value="@role.RoleName" />
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <strong>@role.RoleName</strong>
+            </div>
+            <button type="submit" class="btn btn-sm btn-primary">Save permissions</button>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                @for (var i = 0; i < rolePermissions.Count; i++)
+                {
+                    <div class="col-md-6 col-lg-4 mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="Permissions[@i].Assigned" value="true" 
+                                @(rolePermissions[i].Assigned ? "checked" : string.Empty) 
+                                @(rolePermissions[i].Name == PermissionNames.ViewAdminArea && role.RoleName == RoleNames.Admin ? "disabled" : string.Empty) />
+                            <input type="hidden" name="Permissions[@i].Name" value="@rolePermissions[i].Name" />
+                            <input type="hidden" name="Permissions[@i].DisplayName" value="@rolePermissions[i].DisplayName" />
+                            <label class="form-check-label">@rolePermissions[i].DisplayName</label>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </form>
+}

@@ -30,7 +30,11 @@ namespace SubtitlesTranslator.Application.UseCases {
             var user = await _userRepository.GetUserByIdAsync(transaction.UserId);
             var mailSubject = _emailTemplateService.GetMailSubjectPaymentSuccess();
             var htmlBodyContent = _emailTemplateService.GetMailBodyPaymentSuccess(transaction.CreditsPurchased);
-            var pdfResult = await _generatePDFInvoice.ExecuteAsync(transactionId);
+
+            var pdfResult = await _generatePDFInvoice.ExecuteAsync(transactionId, isIntId: true);
+            if (pdfResult.PdfBytes == null || pdfResult.PdfBytes.Length == 0 || string.IsNullOrEmpty(pdfResult.InvoiceNumber)) {
+                throw new Exception("Failed to generate PDF invoice.");
+            }
             var attachment = new EmailAttachment {
                 FileName = $"Invoice-{transaction.InvoiceNumber}.pdf",
                 ByteContent = pdfResult.PdfBytes,
