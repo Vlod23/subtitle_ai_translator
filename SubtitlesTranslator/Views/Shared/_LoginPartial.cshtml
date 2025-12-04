@@ -21,7 +21,7 @@
         </button>
     </li>
     <li class="nav-item upload-estimate">
-            <a asp-controller="SubtitleManagement" asp-action="MyTranslations" class="nav-link">
+            <a asp-area="" asp-controller="SubtitleManagement" asp-action="MyTranslations" class="nav-link">
                 <span>Credits: </span>
                 <span class="text-success">@await Component.InvokeAsync("UserCredits")</span> @* <span id="userCredits"> *@
             </a>
