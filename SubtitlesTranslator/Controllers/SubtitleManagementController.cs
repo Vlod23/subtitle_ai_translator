@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SubtitlesTranslator.Application.Authorization;
 using SubtitlesTranslator.Application.DTOs;
 using SubtitlesTranslator.Application.Interfaces;
 using SubtitlesTranslator.Application.UseCases;
@@ -86,7 +87,7 @@ namespace SubtitlesTranslator.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Policy = PermissionNames.DeleteSubtitles)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)

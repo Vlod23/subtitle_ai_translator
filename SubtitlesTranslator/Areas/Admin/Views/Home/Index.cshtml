@@ -1,0 +1,44 @@
+@using SubtitlesTranslator.Application.Authorization
+@{
+    ViewData["Title"] = "Admin";
+    var canManageRoles = User.HasClaim(AuthorizationConstants.PermissionClaimType, PermissionNames.ManageRoles);
+    var canGenerateInvoices = User.HasClaim(AuthorizationConstants.PermissionClaimType, PermissionNames.GenerateInvoices);
+}
+
+<h1 class="h3 mb-3">Admin dashboard</h1>
+<p class="text-muted">Quick links based on your permissions.</p>
+
+<div class="row g-3">
+    @if (canManageRoles)
+    {
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">User & role management</h5>
+                    <p class="card-text">Assign roles, lock accounts, and reset passwords.</p>
+                    <div class="mt-auto">
+                        <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="btn btn-primary">Open users</a>
+                        <a asp-area="Admin" asp-controller="Roles" asp-action="Index" class="btn btn-link">Roles & permissions</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    @if (canGenerateInvoices)
+    {
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Invoice tools</h5>
+                    <p class="card-text">Download any transaction invoice by ID.</p>
+                    <form asp-area="Admin" asp-controller="Invoices" asp-action="Download" method="get" class="mt-auto">
+                        <div class="input-group">
+                            <input type="number" min="1" name="transactionId" class="form-control" placeholder="Transaction ID" required />
+                            <button type="submit" class="btn btn-outline-primary">Download</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+</div>

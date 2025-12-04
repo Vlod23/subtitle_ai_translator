@@ -57,11 +57,13 @@ namespace SubtitlesTranslator.Application.UseCases
             model.PaymentCurrency = transaction.Currency;
             model.InvoiceNumber = transaction.InvoiceNumber;
 
-            var result = new InvoicePdfResult();
+            var result = new InvoicePdfResult
+            {
+                UserId = transaction.UserId,
+                PdfBytes = _PDFGenerator.Generate(model),
+                InvoiceNumber = transaction.InvoiceNumber
+            };
 
-            result.PdfBytes = _PDFGenerator.Generate(model);
-            result.InvoiceNumber = transaction.InvoiceNumber;
-            
             return result;
         }
     }

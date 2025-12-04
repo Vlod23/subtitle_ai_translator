@@ -1,0 +1,81 @@
+@model UserIndexViewModel
+@{
+    ViewData["Title"] = "User management";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 mb-0">User management</h1>
+    <a asp-area="Admin" asp-controller="Roles" asp-action="Index" class="btn btn-outline-primary">Manage roles & permissions</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-sm-8 col-md-6">
+        <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search by email or username" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Search</button>
+        <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+    </div>
+</form>
+
+<table class="table table-striped align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>Email</th>
+            <th>Username</th>
+            <th>Roles</th>
+            <th class="text-center">2FA</th>
+            <th class="text-center">Lockout</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var user in Model.Users)
+    {
+        <tr>
+            <td>@user.Email</td>
+            <td>@user.UserName</td>
+            <td>@string.Join(", ", user.Roles)</td>
+            <td class="text-center">
+                @if (user.TwoFactorEnabled)
+                {
+                    <span class="badge bg-success">Enabled</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">Off</span>
+                }
+            </td>
+            <td class="text-center">
+                @if (user.IsLockedOut)
+                {
+                    <span class="badge bg-danger">Locked</span>
+                }
+                else
+                {
+                    <span class="badge bg-success">Active</span>
+                }
+            </td>
+            <td class="text-end">
+                <a asp-area="Admin" asp-controller="Users" asp-action="EditRoles" asp-route-id="@user.Id" class="btn btn-sm btn-primary">Manage</a>
+                @if (user.IsLockedOut)
+                {
+                    <form asp-area="Admin" asp-controller="Users" asp-action="Unlock" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@user.Id" />
+                        <button type="submit" class="btn btn-sm btn-outline-success">Unlock</button>
+                    </form>
+                }
+                else
+                {
+                    <form asp-area="Admin" asp-controller="Users" asp-action="Lock" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@user.Id" />
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Lock</button>
+                    </form>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

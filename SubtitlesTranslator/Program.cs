@@ -5,10 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
 using Stripe;
 using Stripe.Checkout;
+using SubtitlesTranslator.Application.Authorization;
 using SubtitlesTranslator.Application.Interfaces;
 using SubtitlesTranslator.Application.Services;
 using SubtitlesTranslator.Application.UseCases;
 using SubtitlesTranslator.Data;
+using SubtitlesTranslator.Infrastructure.Identity;
 using SubtitlesTranslator.Infrastructure.Repositories;
 using SubtitlesTranslator.Infrastructure.Services;
 using SubtitlesTranslator.Infrastructure.Stripe;
@@ -38,7 +40,20 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(
         options.SignIn.RequireConfirmedAccount = true;
         options.SignIn.RequireConfirmedEmail = true;
     })
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(PermissionNames.ViewAdminArea, policy =>
+        policy.RequireClaim(AuthorizationConstants.PermissionClaimType, PermissionNames.ViewAdminArea));
+    options.AddPolicy(PermissionNames.ManageRoles, policy =>
+        policy.RequireClaim(AuthorizationConstants.PermissionClaimType, PermissionNames.ManageRoles));
+    options.AddPolicy(PermissionNames.GenerateInvoices, policy =>
+        policy.RequireClaim(AuthorizationConstants.PermissionClaimType, PermissionNames.GenerateInvoices));
+    options.AddPolicy(PermissionNames.DeleteSubtitles, policy =>
+        policy.RequireClaim(AuthorizationConstants.PermissionClaimType, PermissionNames.DeleteSubtitles));
+});
 
 if (builder.Environment.IsDevelopment())
 {
@@ -121,6 +136,8 @@ builder.Services.AddScoped<SessionService>();
 
 var app = builder.Build();
 
+await IdentityDataSeeder.SeedAsync(app.Services, app.Configuration);
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -136,8 +153,13 @@ else
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 app.UseHangfireDashboard();
+
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "default",
