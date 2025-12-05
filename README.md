@@ -32,7 +32,9 @@ It supports large subtitle files (with automated chunking), background processin
 
 📄 PDF invoice generation (QuestPDF)
 
-👤 User authentication with ASP.NET Identity or Google OAuth
+👤 User authentication with ASP.NET Identity
+
+🛠️ Admin interface with user management (roles and permissions, locking users, generating their invoices)
 
 ---
 
@@ -54,41 +56,49 @@ It supports large subtitle files (with automated chunking), background processin
 ## ⚙️ Development Setup (Run Locally)
 
 ### 1️⃣ Clone the repository
-```
-git clone https://github.com/<your-username>/<your-repo>
-```
 ### 2️⃣ Open in Visual Studio 2022+
 ### 3️⃣ Restore NuGet packages
+VS should do this automatically. If not, open cmd/powershell/terminal in the app main directory and use:
 ```
   Visual Studio → Build → Restore NuGet Packages
 ```
 ### 4️⃣ Configure User Secrets
 
-In order to use all app features, you need to create your own accounts with all of the used services (OpenAi, Stripe, AWS, Google).
-To make the translations work, OpenAI and AWS (mailing) is mandatory. You can avoid Stripe by manually adding credits in the DB and to avoid using Google login, just create you account without Google.
+- To make only the translations work, OpenAI API credentials are mandatory (OpenAI:ApiKey). 
+- To make mailing work, set up your AWS SES mailing
+- To make payments work, setup your Stripe account (test environment)
+- To make Google auth work, setup your Google account (https://console.cloud.google.com/apis/credentials)
 
 After creating your accounts and generating API keys and other secrets, right-click your Web project → Manage User Secrets.
 
-Paste the following into secrets.json and fill the demo values with the real ones:
+Paste the following into secrets.json and fill the values with the real ones:
 ```
 {
+  // AI Translations
   "OpenAI:ApiKey": "YOUR_OPENAI_KEY",
 
+  // Mailing
   "Email:Username": "YOUR_AWS_SES_USERNAME",
   "Email:Password": "YOUR_AWS_SES_PASSWORD",
   "Email:FromEmail": "sender@example.com",
   "Email:FromName": "AI Subtitle Translator",
 
+  // Demo Payments
   "Stripe:SecretKey": "YOUR_STRIPE_SECRET",
   "Stripe:WebhookSecret": "YOUR_STRIPE_WEBHOOK",
 
+  // Signing up with Google
   "Authentication:Google:ClientId": "YOUR_GOOGLE_ID",
   "Authentication:Google:ClientSecret": "YOUR_GOOGLE_SECRET"
+
+  // !!! Before starting the app, set up your default admin email and password in order to gain access to Admin interface
+  "DefaultAdmin:Email": "YOUR_REAL_EMAIL",
+  "DefaultAdmin:Password": "CREATE_PASSWORD" (requires uppercase, lowercase, number, and a special char)
 }
 ```
-(These values must NOT be stored in appsettings.json and should never be committed to GitHub.)
 
 ### 5️⃣ Create the database
+Open cmd/powershell/terminal in the app directory and use:
 ```
 dotnet ef database update
 ```
@@ -97,8 +107,9 @@ dotnet ef database update
 
 ## 🛡 License
 
-This project is licensed under the MIT License.
-You are free to use, modify, and distribute it.
+This project is licensed under the CC BY-NC 4.0 License.
+You may use, modify, and distribute this software for non-commercial purposes only.
+Commercial use is prohibited without explicit permission.
 
 ---
 
@@ -107,5 +118,6 @@ You are free to use, modify, and distribute it.
 Developed by Vladimir Kivader, Slovakia.
 
 If you like this project, feel free to ⭐ star the repo!
+Also, your feedback is highly appreciated.
 
 
